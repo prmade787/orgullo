@@ -401,6 +401,9 @@
   </footer>
 
 </div>
+<!-- Brevo form — hidden, used as silent POST target -->
+<iframe name="brevo-frame" style="display:none;" aria-hidden="true"></iframe>
+
 <script>
   var strings = {
     es: {
@@ -414,7 +417,7 @@
       label: 'Soy artista — quiero unirme',
       placeholder: 'tu@email.com',
       inputLabel: 'Tu dirección de email',
-      submitBtn: 'Avisenme',
+      submitBtn: 'Avísenme',
       note: 'Solo te escribiremos cuando abramos. Sin spam.',
       success: '<strong>¡Listo.</strong> Te avisamos cuando abramos. Gracias por creer en esto.'
     },
@@ -461,15 +464,6 @@
   var submitBtn = document.getElementById('submitBtn');
   var input = document.getElementById('emailInput');
 
-  // ── BREVO CONFIG ──────────────────────────────
-  // After creating your Brevo account:
-  // 1. Go to Settings → API Keys → Generate a new key
-  // 2. Paste it below as BREVO_API_KEY
-  // 3. Go to Contacts → Lists → create a list called "Orgullo Waitlist"
-  // 4. Click the list → the number in the URL is your BREVO_LIST_ID
-  var BREVO_API_KEY  = 'PASTE_YOUR_API_KEY_HERE';
-  var BREVO_LIST_ID  = 0; // replace 0 with your list number
-
   function submit() {
     var val = input.value.trim();
     if (!val || val.indexOf('@') === -1 || val.indexOf('.') === -1) {
@@ -483,40 +477,42 @@
       return;
     }
 
-    // Disable button while sending
-    var btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = '...';
+    // Build a hidden form and POST silently into the Brevo iframe
+    // No API key needed — Brevo's own form URL handles auth server-side
+    var form = document.createElement('form');
+    form.method  = 'POST';
+    form.action  = 'https://6560e91a.sibforms.com/serve/MUIFAIVpCT46ewOWs6p8FOT6Tp-bgXYDqiqGrv3MiAUQaB_1ywke2R3kgLkXkd8Pm-RBrqlbkfqZkvjo3yP4696QoJ6t3xvoqIPcuLf-G43v0MWVa6MMvz62wwPbdlg_SsDSUIkejcTQ2UCYAoxUPOmv-w32x95LTs5AQSlcDpyWASfyZpbRCRmvAlEY-9OKTPy5wF9N5GXW_Fg1fw==';
+    form.target  = 'brevo-frame';  // posts into the hidden iframe
 
-    fetch('https://api.brevo.com/v3/contacts', {
-      method: 'POST',
-      headers: {
-        'accept':       'application/json',
-        'content-type': 'application/json',
-        'api-key':      BREVO_API_KEY
-      },
-      body: JSON.stringify({
-        email:         val,
-        listIds:       [BREVO_LIST_ID],
-        updateEnabled: true
-      })
-    })
-    .then(function(res) {
-      // 201 = created, 204 = already existed (updated) — both are success
-      if (res.ok || res.status === 204) {
-        document.getElementById('formRow').style.display = 'none';
-        document.getElementById('t-note').style.display = 'none';
-        document.getElementById('successMsg').style.display = 'block';
-      } else {
-        return res.json().then(function(data) { throw data; });
-      }
-    })
-    .catch(function() {
-      // On any error still show success to the user (don't leak API errors)
-      document.getElementById('formRow').style.display = 'none';
-      document.getElementById('t-note').style.display = 'none';
-      document.getElementById('successMsg').style.display = 'block';
-    });
+    // Email field — Brevo expects 'EMAIL'
+    var emailField = document.createElement('input');
+    emailField.type  = 'hidden';
+    emailField.name  = 'EMAIL';
+    emailField.value = val;
+    form.appendChild(emailField);
+
+    // Honeypot field Brevo requires (must be empty)
+    var check = document.createElement('input');
+    check.type  = 'hidden';
+    check.name  = 'email_address_check';
+    check.value = '';
+    form.appendChild(check);
+
+    // Locale
+    var locale = document.createElement('input');
+    locale.type  = 'hidden';
+    locale.name  = 'locale';
+    locale.value = lang;
+    form.appendChild(locale);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    // Show success immediately — no need to wait for the iframe response
+    document.getElementById('formRow').style.display = 'none';
+    document.getElementById('t-note').style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
   }
 
   submitBtn.addEventListener('click', submit);
