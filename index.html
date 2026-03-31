@@ -135,77 +135,13 @@
       animation: appear .6s .7s forwards;
     }
 
-    .form-label {
-      font-size: .65rem;
-      font-weight: 600;
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      color: var(--ink);
-      margin-bottom: .85rem;
+    .form-block iframe {
+      width: 540px;
+      max-width: 100%;
+      height: 305px;
+      border: none;
+      display: block;
     }
-
-    .form-row {
-      display: flex;
-      max-width: 430px;
-    }
-
-    .form-row input {
-      flex: 1;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-right: none;
-      color: var(--ink);
-      font-family: var(--font);
-      font-size: .88rem;
-      letter-spacing: .03em;
-      padding: .82rem 1.1rem;
-      outline: none;
-      transition: border-color .2s;
-      -webkit-appearance: none;
-      border-radius: 0;
-    }
-    .form-row input::placeholder { color: var(--body); }
-    .form-row input:focus { border-color: var(--ink); }
-
-    .form-row button {
-      background: var(--ink);
-      color: var(--bg);
-      border: 1px solid var(--ink);
-      font-family: var(--font);
-      font-size: .65rem;
-      font-weight: 600;
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      padding: .82rem 1.25rem;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: background .2s, border-color .2s;
-      border-radius: 0;
-    }
-    .form-row button:hover {
-      background: var(--rojo);
-      border-color: var(--rojo);
-    }
-
-    .form-note {
-      margin-top: .7rem;
-      font-size: .65rem;
-      letter-spacing: .06em;
-      color: var(--body);
-    }
-
-    .success-msg {
-      display: none;
-      font-size: .82rem;
-      letter-spacing: .04em;
-      color: var(--ink);
-      padding: .85rem 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      max-width: 430px;
-    }
-    .success-msg strong { color: var(--rojo); }
 
     /* ── FOOTER ── */
     footer {
@@ -380,15 +316,13 @@
       Estamos construyendo algo grande. Si eres artista latino en EE. UU. y quieres ser parte desde el inicio, dejanos tu email.
     </p>
     <div class="form-block">
-      <div class="form-label" id="t-label">Soy artista &mdash; quiero unirme</div>
-      <div class="form-row" id="formRow">
-        <input type="email" id="emailInput" placeholder="tu@email.com" autocomplete="email" aria-label="Tu direccion de email" />
-        <button type="button" id="submitBtn">Avisenme</button>
-      </div>
-      <p class="form-note" id="t-note">Solo te escribiremos cuando abramos. Sin spam.</p>
-      <div class="success-msg" id="successMsg" role="status" aria-live="polite">
-        <strong>Listo.</strong> Te avisamos cuando abramos. Gracias por creer en este movimiento.
-      </div>
+      <iframe
+        src="https://6560e91a.sibforms.com/serve/MUIFAIVpCT46ewOWs6p8FOT6Tp-bgXYDqiqGrv3MiAUQaB_1ywke2R3kgLkXkd8Pm-RBrqlbkfqZkvjo3yP4696QoJ6t3xvoqIPcuLf-G43v0MWVa6MMvz62wwPbdlg_SsDSUIkejcTQ2UCYAoxUPOmv-w32x95LTs5AQSlcDpyWASfyZpbRCRmvAlEY-9OKTPy5wF9N5GXW_Fg1fw=="
+        frameborder="0"
+        scrolling="auto"
+        allowfullscreen
+        title="Formulario de registro — Orgullo.art"
+      ></iframe>
     </div>
   </main>
 
@@ -401,9 +335,6 @@
   </footer>
 
 </div>
-<!-- Brevo form — hidden, used as silent POST target -->
-<iframe name="brevo-frame" style="display:none;" aria-hidden="true"></iframe>
-
 <script>
   var strings = {
     es: {
@@ -434,7 +365,7 @@
       inputLabel: 'Your email address',
       submitBtn: 'Notify me',
       note: 'We will only reach out when we open. No spam.',
-      success: '<strong>Done.</strong> We will let you know when we open. Thank you for believing in this.'
+      success: '<strong>Done.</strong> We will let you know when we open. Thank you for believing in this movement.'
     }
   };
 
@@ -461,64 +392,7 @@
     document.documentElement.lang = lang;
   });
 
-  var submitBtn = document.getElementById('submitBtn');
-  var input = document.getElementById('emailInput');
 
-  function submit() {
-    var val = input.value.trim();
-    if (!val || val.indexOf('@') === -1 || val.indexOf('.') === -1) {
-      input.style.borderColor = '#d91f28';
-      input.setAttribute('aria-invalid', 'true');
-      input.focus();
-      setTimeout(function() {
-        input.style.borderColor = '';
-        input.removeAttribute('aria-invalid');
-      }, 1800);
-      return;
-    }
-
-    // Build a hidden form and POST silently into the Brevo iframe
-    // No API key needed — Brevo's own form URL handles auth server-side
-    var form = document.createElement('form');
-    form.method  = 'POST';
-    form.action  = 'https://6560e91a.sibforms.com/serve/MUIFAIVpCT46ewOWs6p8FOT6Tp-bgXYDqiqGrv3MiAUQaB_1ywke2R3kgLkXkd8Pm-RBrqlbkfqZkvjo3yP4696QoJ6t3xvoqIPcuLf-G43v0MWVa6MMvz62wwPbdlg_SsDSUIkejcTQ2UCYAoxUPOmv-w32x95LTs5AQSlcDpyWASfyZpbRCRmvAlEY-9OKTPy5wF9N5GXW_Fg1fw==';
-    form.target  = 'brevo-frame';  // posts into the hidden iframe
-
-    // Email field — Brevo expects 'EMAIL'
-    var emailField = document.createElement('input');
-    emailField.type  = 'hidden';
-    emailField.name  = 'EMAIL';
-    emailField.value = val;
-    form.appendChild(emailField);
-
-    // Honeypot field Brevo requires (must be empty)
-    var check = document.createElement('input');
-    check.type  = 'hidden';
-    check.name  = 'email_address_check';
-    check.value = '';
-    form.appendChild(check);
-
-    // Locale
-    var locale = document.createElement('input');
-    locale.type  = 'hidden';
-    locale.name  = 'locale';
-    locale.value = lang;
-    form.appendChild(locale);
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-
-    // Show success immediately — no need to wait for the iframe response
-    document.getElementById('formRow').style.display = 'none';
-    document.getElementById('t-note').style.display = 'none';
-    document.getElementById('successMsg').style.display = 'block';
-  }
-
-  submitBtn.addEventListener('click', submit);
-  input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') submit();
-  });
 </script>
 </body>
 </html>
